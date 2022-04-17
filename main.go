@@ -49,14 +49,15 @@ const (
 type Args struct {
 	Name  string       `json:"name"`
 	Type  VariableType `json:"type"`
+	Value string       `json:"value"`
 	Query Query        `json:"sql"`
 }
 
 type Commands interface {
-	CreateVariable(ctx context.Context, input *jen.File, args *Args) (*jen.File, error)
-	HashPassword(ctx context.Context, input *jen.File, args *Args) (*jen.File, error)
-	DatabaseConnect(ctx context.Context, input *jen.File, args *Args) (*jen.File, error)
-	DatabaseQuery(ctx context.Context, input *jen.File, args *Args) (*jen.File, error)
+	CreateVariable(ctx context.Context, input *jen.File, args Args) (*jen.File, error)
+	HashPassword(ctx context.Context, input *jen.File, args Args) (*jen.File, error)
+	DatabaseConnect(ctx context.Context, input *jen.File, args Args) (*jen.File, error)
+	DatabaseQuery(ctx context.Context, input *jen.File, args Args) (*jen.File, error)
 }
 
 type generateCode struct {
@@ -69,17 +70,39 @@ func NewGenerateCode(id string) Commands {
 	}
 }
 
-func (gc *generateCode) CreateVariable(ctx context.Context, input *jen.File, args *Args) (file *jen.File, err error) {
+func (gc *generateCode) CreateVariable(ctx context.Context, input *jen.File, args Args) (file *jen.File, err error) {
+	input.Func().Id("main").Params().Block(
+		jen.Id(args.Name).Op(":=").Lit(args.Value),
+	)
 	return
 }
-func (gc *generateCode) HashPassword(ctx context.Context, input *jen.File, args *Args) (file *jen.File, err error) {
+
+func (gc *generateCode) HashPassword(ctx context.Context, input *jen.File, args Args) (file *jen.File, err error) {
 	return
 }
-func (gc *generateCode) DatabaseConnect(ctx context.Context, input *jen.File, args *Args) (file *jen.File, err error) {
+
+func (gc *generateCode) DatabaseConnect(ctx context.Context, input *jen.File, args Args) (file *jen.File, err error) {
 	return
 }
-func (gc *generateCode) DatabaseQuery(ctx context.Context, input *jen.File, args *Args) (file *jen.File, err error) {
+
+func (gc *generateCode) DatabaseQuery(ctx context.Context, input *jen.File, args Args) (file *jen.File, err error) {
 	return
+}
+
+func (gc *generateCode) Add(ctx context.Context, input *jen.File, command *Command) (file *jen.File, err error) {
+	switch command.Name {
+	case CreateVariable:
+		return gc.CreateVariable(ctx, input, command.Args)
+	case HashPassword:
+		return gc.HashPassword(ctx, input, command.Args)
+	case DatabaseConnect:
+		return gc.DatabaseConnect(ctx, input, command.Args)
+	case DatabaseQuery:
+		return gc.DatabaseQuery(ctx, input, command.Args)
+	default:
+		return nil, nil
+	}
+
 }
 
 func main() {
