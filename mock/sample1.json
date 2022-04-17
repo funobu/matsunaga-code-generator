@@ -1,0 +1,35 @@
+[
+    {
+        "command": "create variable",
+        "args": {
+            "name": "password",
+            "type": "string",
+            "value": "12345"
+        }
+    },
+    {
+        "command": "hash password",
+        "args": {
+            "name": "hashed_password",
+            "target": "password"
+        }
+    },
+    {
+        "command": "database connect"
+    },
+    {
+        "command": "database query",
+        "args": {
+            "sql": {
+                "table": "user",
+                "type": "select", 
+                "where": {
+                    "AND": {
+                        "email": "email",
+                        "password": "password"
+                    }
+                }
+            }
+        }
+    }
+]
