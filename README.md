@@ -1,2 +1,2 @@
 # matsunaga-code-generator
-This is a API code generator for Matsunaga project 2023.
+This is an API code generator for Matsunaga project 2023.
