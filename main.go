@@ -1,14 +1,19 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
+
+	"github.com/dave/jennifer/jen"
 )
 
+// CommandName define what kind of generate command.
 type CommandName string
 
+// below is the defined generate command.
 const (
 	CreateVariable  = CommandName("create variable")
 	HashPassword    = CommandName("hash password")
@@ -45,6 +50,36 @@ type Args struct {
 	Name  string       `json:"name"`
 	Type  VariableType `json:"type"`
 	Query Query        `json:"sql"`
+}
+
+type Commands interface {
+	CreateVariable(ctx context.Context, input *jen.File, args *Args) (*jen.File, error)
+	HashPassword(ctx context.Context, input *jen.File, args *Args) (*jen.File, error)
+	DatabaseConnect(ctx context.Context, input *jen.File, args *Args) (*jen.File, error)
+	DatabaseQuery(ctx context.Context, input *jen.File, args *Args) (*jen.File, error)
+}
+
+type generateCode struct {
+	ID string
+}
+
+func NewGenerateCode(id string) Commands {
+	return &generateCode{
+		ID: id,
+	}
+}
+
+func (gc *generateCode) CreateVariable(ctx context.Context, input *jen.File, args *Args) (file *jen.File, err error) {
+	return
+}
+func (gc *generateCode) HashPassword(ctx context.Context, input *jen.File, args *Args) (file *jen.File, err error) {
+	return
+}
+func (gc *generateCode) DatabaseConnect(ctx context.Context, input *jen.File, args *Args) (file *jen.File, err error) {
+	return
+}
+func (gc *generateCode) DatabaseQuery(ctx context.Context, input *jen.File, args *Args) (file *jen.File, err error) {
+	return
 }
 
 func main() {
