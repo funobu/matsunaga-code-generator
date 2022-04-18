@@ -21,11 +21,13 @@ const (
 	DatabaseQuery   = CommandName("database query")
 )
 
+// command is the struct of input command.
 type Command struct {
 	Name CommandName `json:"command"`
 	Args `json:"args"`
 }
 
+// QueryType is the type of SQL Query CRUD.
 type QueryType string
 
 const (
@@ -35,17 +37,20 @@ const (
 	Delete = QueryType("delete")
 )
 
+// Query is the struct of SQL Query.
 type Query struct {
 	Table string    `json:"table"`
 	Type  QueryType `json:"type"`
 }
 
+// VariableType is the type of golang variable.
 type VariableType string
 
 const (
 	String = VariableType("string")
 )
 
+// Args is the struct of input command args.
 type Args struct {
 	Name  string       `json:"name"`
 	Type  VariableType `json:"type"`
@@ -53,52 +58,56 @@ type Args struct {
 	Query Query        `json:"sql"`
 }
 
+// Commands is the interface of input commands.
 type Commands interface {
-	CreateVariable(ctx context.Context, input *jen.File, args Args) (*jen.File, error)
-	HashPassword(ctx context.Context, input *jen.File, args Args) (*jen.File, error)
-	DatabaseConnect(ctx context.Context, input *jen.File, args Args) (*jen.File, error)
-	DatabaseQuery(ctx context.Context, input *jen.File, args Args) (*jen.File, error)
+	CreateVariable(ctx context.Context, output *jen.File, args Args) (*jen.File, error)
+	HashPassword(ctx context.Context, output *jen.File, args Args) (*jen.File, error)
+	DatabaseConnect(ctx context.Context, output *jen.File, args Args) (*jen.File, error)
+	DatabaseQuery(ctx context.Context, output *jen.File, args Args) (*jen.File, error)
 }
 
+// generateCode is the struct of Commands implements.
 type generateCode struct {
 	ID string
 }
 
+// NewGenerateCode is the function that makes generateCode instance.
 func NewGenerateCode(id string) Commands {
 	return &generateCode{
 		ID: id,
 	}
 }
 
-func (gc *generateCode) CreateVariable(ctx context.Context, input *jen.File, args Args) (file *jen.File, err error) {
-	input.Func().Id("main").Params().Block(
+func (gc *generateCode) CreateVariable(ctx context.Context, output *jen.File, args Args) (file *jen.File, err error) {
+	output.Func().Id("main").Params().Block(
 		jen.Id(args.Name).Op(":=").Lit(args.Value),
 	)
 	return
 }
 
-func (gc *generateCode) HashPassword(ctx context.Context, input *jen.File, args Args) (file *jen.File, err error) {
+func (gc *generateCode) HashPassword(ctx context.Context, output *jen.File, args Args) (file *jen.File, err error) {
 	return
 }
 
-func (gc *generateCode) DatabaseConnect(ctx context.Context, input *jen.File, args Args) (file *jen.File, err error) {
+func (gc *generateCode) DatabaseConnect(ctx context.Context, output *jen.File, args Args) (file *jen.File, err error) {
 	return
 }
 
-func (gc *generateCode) DatabaseQuery(ctx context.Context, input *jen.File, args Args) (file *jen.File, err error) {
+func (gc *generateCode) DatabaseQuery(ctx context.Context, output *jen.File, args Args) (file *jen.File, err error) {
 	return
 }
 
-func (gc *generateCode) Add(ctx context.Context, input *jen.File, command *Command) (file *jen.File, err error) {
+// Add method write generated code to the target file.
+func (gc *generateCode) Add(ctx context.Context, output *jen.File, command *Command) (file *jen.File, err error) {
 	switch command.Name {
 	case CreateVariable:
-		return gc.CreateVariable(ctx, input, command.Args)
+		return gc.CreateVariable(ctx, output, command.Args)
 	case HashPassword:
-		return gc.HashPassword(ctx, input, command.Args)
+		return gc.HashPassword(ctx, output, command.Args)
 	case DatabaseConnect:
-		return gc.DatabaseConnect(ctx, input, command.Args)
+		return gc.DatabaseConnect(ctx, output, command.Args)
 	case DatabaseQuery:
-		return gc.DatabaseQuery(ctx, input, command.Args)
+		return gc.DatabaseQuery(ctx, output, command.Args)
 	default:
 		return nil, nil
 	}
