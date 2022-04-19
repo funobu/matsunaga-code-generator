@@ -64,61 +64,76 @@ type Args struct {
 
 // Commands is the interface of input commands.
 type Commands interface {
-	CreateVariable(ctx context.Context, output *jen.File, args Args) (*jen.File, error)
-	HashPassword(ctx context.Context, output *jen.File, args Args) (*jen.File, error)
-	DatabaseConnect(ctx context.Context, output *jen.File, args Args) (*jen.File, error)
-	DatabaseQuery(ctx context.Context, output *jen.File, args Args) (*jen.File, error)
+	createVariable(ctx context.Context, args Args) error
+	hashPassword(ctx context.Context, args Args) error
+	databaseConnect(ctx context.Context, args Args) error
+	databaseQuery(ctx context.Context, args Args) error
+	Add(ctx context.Context, command *Command) error
+	Generate(ctx context.Context) error
 }
 
 // generateCode is the struct of Commands implements.
 type generateCode struct {
-	ID string
+	ID           string
+	CommandLines []*jen.Statement
 }
 
 // NewGenerateCode is the function that makes generateCode instance.
 func NewGenerateCode(id string) Commands {
 	return &generateCode{
-		ID: id,
+		ID:           id,
+		CommandLines: make([]*jen.Statement, 0),
 	}
 }
 
-func (gc *generateCode) CreateVariable(ctx context.Context, output *jen.File, args Args) (file *jen.File, err error) {
-	output.Func().Id("main").Params().Block(
-		jen.Id(args.Name).Op(":=").Lit(args.Value),
-	)
+func (gc *generateCode) createVariable(ctx context.Context, args Args) (err error) {
+	gc.CommandLines = append(gc.CommandLines, jen.Id(args.Name).Op(":=").Lit(args.Value))
 	return
 }
 
-func (gc *generateCode) HashPassword(ctx context.Context, output *jen.File, args Args) (file *jen.File, err error) {
+func (gc *generateCode) hashPassword(ctx context.Context, args Args) (err error) {
 	return
 }
 
-func (gc *generateCode) DatabaseConnect(ctx context.Context, output *jen.File, args Args) (file *jen.File, err error) {
+func (gc *generateCode) databaseConnect(ctx context.Context, args Args) (err error) {
 	return
 }
 
-func (gc *generateCode) DatabaseQuery(ctx context.Context, output *jen.File, args Args) (file *jen.File, err error) {
+func (gc *generateCode) databaseQuery(ctx context.Context, args Args) (err error) {
 	return
 }
 
 // Add method write generated code to the target file.
-func (gc *generateCode) Add(ctx context.Context, output *jen.File, command *Command) (file *jen.File, err error) {
+func (gc *generateCode) Add(ctx context.Context, command *Command) (err error) {
 	switch command.Name {
 	case CreateVariable:
-		return gc.CreateVariable(ctx, output, command.Args)
+		return gc.createVariable(ctx, command.Args)
 	case HashPassword:
-		return gc.HashPassword(ctx, output, command.Args)
+		return gc.hashPassword(ctx, command.Args)
 	case DatabaseConnect:
-		return gc.DatabaseConnect(ctx, output, command.Args)
+		return gc.databaseConnect(ctx, command.Args)
 	case DatabaseQuery:
-		return gc.DatabaseQuery(ctx, output, command.Args)
+		return gc.databaseQuery(ctx, command.Args)
 	default:
-		return nil, nil
+		return nil
 	}
 
 }
 
+func (gc *generateCode) Generate(ctx context.Context) (err error) {
+	f := jen.NewFile("main")
+	f.Func().Id("main").Params().BlockFunc(func(g *jen.Group) {
+		for i := range gc.CommandLines {
+			g.Add(gc.CommandLines[i])
+		}
+	})
+	fmt.Printf("%#v", f)
+
+	return
+}
+
 func main() {
+	ctx := context.Background()
 	commands := make([]*Command, 0)
 
 	input, err := ioutil.ReadFile("./mock/sample1.json")
@@ -132,24 +147,13 @@ func main() {
 
 	fmt.Println(len(commands))
 
+	gc := NewGenerateCode("111")
+
 	for _, command := range commands {
 		fmt.Printf("%s: args -> %v\n", command.Name, command.Args)
+		gc.Add(ctx, command)
 	}
 
-	generateCommandLines := make([]*jen.Statement, 0)
-
-	generateCommandLines = append(generateCommandLines, jen.Qual("fmt", "Println").Call(jen.Lit("Hello, world")))
-	generateCommandLines = append(generateCommandLines, jen.Qual("fmt", "Println").Call(jen.Lit("This is a Code Generator for Matsunaga Project.")))
-	generateCommandLines = append(generateCommandLines, jen.Qual("fmt", "Println").Call(jen.Lit("By JSON file, code will be created.")))
-	generateCommandLines = append(generateCommandLines, jen.Qual("fmt", "Println").Call(jen.Lit("Please use this library!!!")))
-
-	// test
-	f := jen.NewFile("main")
-	f.Func().Id("main").Params().BlockFunc(func(g *jen.Group) {
-		for i := range generateCommandLines {
-			g.Add(generateCommandLines[i])
-		}
-	})
-	fmt.Printf("%#v", f)
+	gc.Generate(ctx)
 
 }
