@@ -22,7 +22,7 @@
         "args": {
             "sql": {
                 "table": "user",
-                "type": "select", 
+                "type": "select",
                 "where": {
                     "AND": {
                         "email": "email",
@@ -30,6 +30,47 @@
                     }
                 }
             }
+        }
+    },
+    {
+        "command": "database query",
+        "args": {
+            "sql": {
+                "table": "user",
+                "type": "insert",
+                "values": {
+                    "email": "email",
+                    "password": "password"
+                }
+            }
+        }
+    },
+    {
+        "command": "database query",
+        "args": {
+            "sql": {
+                "table": "user",
+                "type": "update",
+                "values": {
+                    "email": "email",
+                    "password": "password"
+                }
+            }
+        }
+    },
+    {
+        "command": "set variable",
+        "args": {
+            "name": "email",
+            "value": "example@test.com"
+        }
+    },
+    {
+        "command": "compare values",
+        "args": {
+            "name": "email",
+            "comp_operator": "==",
+            "value": "example@test.com"
         }
     }
 ]

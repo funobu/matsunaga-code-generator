@@ -92,14 +92,17 @@ func (gc *generateCode) createVariable(ctx context.Context, args Args) (err erro
 }
 
 func (gc *generateCode) hashPassword(ctx context.Context, args Args) (err error) {
+	gc.CommandLines = append(gc.CommandLines, jen.Id(args.Name).Op(":=").Lit(args.Value))
 	return
 }
 
 func (gc *generateCode) databaseConnect(ctx context.Context, args Args) (err error) {
+	gc.CommandLines = append(gc.CommandLines, jen.Id(args.Name).Op(":=").Lit(args.Value))
 	return
 }
 
 func (gc *generateCode) databaseQuery(ctx context.Context, args Args) (err error) {
+	gc.CommandLines = append(gc.CommandLines, jen.Id(args.Name).Op(":=").Lit(args.Value))
 	return
 }
 
