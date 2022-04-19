@@ -16,6 +16,8 @@ type CommandName string
 // below is the defined generate command.
 const (
 	CreateVariable  = CommandName("create variable")
+	ChangeVariable  = CommandName("change variable")
+	JudgeTarget     = CommandName("judge target")
 	HashPassword    = CommandName("hash password")
 	DatabaseConnect = CommandName("database connect")
 	DatabaseQuery   = CommandName("database query")
@@ -39,8 +41,10 @@ const (
 
 // Query is the struct of SQL Query.
 type Query struct {
-	Table string    `json:"table"`
-	Type  QueryType `json:"type"`
+	Table  string    `json:"table"`
+	Type   QueryType `json:"type"`
+	Notion string    `json:"notion"`
+	Update string    `json:"update"`
 }
 
 // VariableType is the type of golang variable.
@@ -131,5 +135,21 @@ func main() {
 	for _, command := range commands {
 		fmt.Printf("%s: args -> %v\n", command.Name, command.Args)
 	}
+
+	generateCommandLines := make([]*jen.Statement, 0)
+
+	generateCommandLines = append(generateCommandLines, jen.Qual("fmt", "Println").Call(jen.Lit("Hello, world")))
+	generateCommandLines = append(generateCommandLines, jen.Qual("fmt", "Println").Call(jen.Lit("This is a Code Generator for Matsunaga Project.")))
+	generateCommandLines = append(generateCommandLines, jen.Qual("fmt", "Println").Call(jen.Lit("By JSON file, code will be created.")))
+	generateCommandLines = append(generateCommandLines, jen.Qual("fmt", "Println").Call(jen.Lit("Please use this library!!!")))
+
+	// test
+	f := jen.NewFile("main")
+	f.Func().Id("main").Params().BlockFunc(func(g *jen.Group) {
+		for i := range generateCommandLines {
+			g.Add(generateCommandLines[i])
+		}
+	})
+	fmt.Printf("%#v", f)
 
 }
