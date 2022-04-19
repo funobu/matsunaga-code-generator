@@ -17,10 +17,11 @@ type CommandName string
 const (
 	CreateVariable  = CommandName("create variable")
 	ChangeVariable  = CommandName("change variable")
-	JudgeTarget     = CommandName("judge target")
 	HashPassword    = CommandName("hash password")
 	DatabaseConnect = CommandName("database connect")
 	DatabaseQuery   = CommandName("database query")
+	SetVariable     = CommandName("set variable")
+	CompareValues   = CommandName("compare values")
 )
 
 // command is the struct of input command.
@@ -41,10 +42,8 @@ const (
 
 // Query is the struct of SQL Query.
 type Query struct {
-	Table  string    `json:"table"`
-	Type   QueryType `json:"type"`
-	Notion string    `json:"notion"`
-	Update string    `json:"update"`
+	Table string    `json:"table"`
+	Type  QueryType `json:"type"`
 }
 
 // VariableType is the type of golang variable.
@@ -56,20 +55,25 @@ const (
 
 // Args is the struct of input command args.
 type Args struct {
-	Name  string       `json:"name"`
-	Type  VariableType `json:"type"`
-	Value string       `json:"value"`
-	Query Query        `json:"sql"`
+	Name         string       `json:"name"`
+	Type         VariableType `json:"type"`
+	Value        string       `json:"value"`
+	Query        Query        `json:"sql"`
+	Target       string       `json:"target"`
+	CompOperator string       `json:"comp_operator"`
 }
 
 // Commands is the interface of input commands.
 type Commands interface {
+	Add(ctx context.Context, command *Command) error
+	Generate(ctx context.Context) error
+
 	createVariable(ctx context.Context, args Args) error
 	hashPassword(ctx context.Context, args Args) error
 	databaseConnect(ctx context.Context, args Args) error
 	databaseQuery(ctx context.Context, args Args) error
-	Add(ctx context.Context, command *Command) error
-	Generate(ctx context.Context) error
+	SetVariable(ctx context.Context, args Args) error
+	CompareValues(ctx context.Context, args Args) error
 }
 
 // generateCode is the struct of Commands implements.
@@ -106,6 +110,16 @@ func (gc *generateCode) databaseQuery(ctx context.Context, args Args) (err error
 	return
 }
 
+func (gc *generateCode) SetVariable(ctx context.Context, args Args) (err error) {
+	gc.CommandLines = append(gc.CommandLines, jen.Id(args.Name).Op(":=").Lit(args.Value))
+	return
+}
+
+func (gc *generateCode) CompareValues(ctx context.Context, args Args) (err error) {
+	gc.CommandLines = append(gc.CommandLines, jen.Id(args.Name).Op(":=").Lit(args.Value))
+	return
+}
+
 // Add method write generated code to the target file.
 func (gc *generateCode) Add(ctx context.Context, command *Command) (err error) {
 	switch command.Name {
@@ -117,6 +131,10 @@ func (gc *generateCode) Add(ctx context.Context, command *Command) (err error) {
 		return gc.databaseConnect(ctx, command.Args)
 	case DatabaseQuery:
 		return gc.databaseQuery(ctx, command.Args)
+	case SetVariable:
+		return gc.SetVariable(ctx, command.Args)
+	case CompareValues:
+		return gc.CompareValues(ctx, command.Args)
 	default:
 		return nil
 	}
