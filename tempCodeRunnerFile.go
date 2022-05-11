@@ -1,1 +1,3 @@
-	gc.Generate(ctx)
+func (gc *generateCode) CommandDivide(comname string) (err error) {
+
+// }

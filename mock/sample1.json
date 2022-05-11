@@ -1,76 +1,101 @@
 [
-    {
-        "command": "create variable",
-        "args": {
-            "name": "password",
-            "type": "string",
-            "value": "12345"
-        }
-    },
-    {
-        "command": "hash password",
-        "args": {
-            "name": "hashed_password",
-            "target": "password"
-        }
-    },
-    {
-        "command": "database connect"
-    },
-    {
-        "command": "database query",
-        "args": {
-            "sql": {
-                "table": "user",
-                "type": "select",
-                "where": {
-                    "AND": {
-                        "email": "email",
-                        "password": "password"
-                    }
-                }
-            }
-        }
-    },
-    {
-        "command": "database query",
-        "args": {
-            "sql": {
-                "table": "user",
-                "type": "insert",
-                "values": {
-                    "email": "email",
-                    "password": "password"
-                }
-            }
-        }
-    },
-    {
-        "command": "database query",
-        "args": {
-            "sql": {
-                "table": "user",
-                "type": "update",
-                "values": {
-                    "email": "email",
-                    "password": "password"
-                }
-            }
-        }
-    },
-    {
-        "command": "set variable",
-        "args": {
-            "name": "email",
-            "value": "example@test.com"
-        }
-    },
-    {
-        "command": "compare values",
-        "args": {
-            "name": "email",
-            "comp_operator": "==",
-            "value": "example@test.com"
-        }
+  {
+    "command": "create variable",
+    "args": {
+      "name": "email",
+      "type": "string",
+      "value": "test@example.com"
     }
+  },
+  {
+    "command": "hash password",
+    "args": {
+      "name": "hashed_password",
+      "target": "password"
+    }
+  },
+  {
+    "command": "database connect"
+  },
+  {
+    "command": "database query",
+    "args": {
+      "sql": {
+        "table": "user",
+        "type": "select",
+        "where": {
+          "AND": {
+            "email": "email",
+            "password": "password"
+          }
+        }
+      }
+    }
+  },
+  {
+    "command": "database query",
+    "args": {
+      "sql": {
+        "table": "user",
+        "type": "insert",
+        "values": {
+          "email": "email",
+          "password": "password"
+        }
+      }
+    }
+  },
+  {
+    "command": "database query",
+    "args": {
+      "sql": {
+        "table": "user",
+        "type": "update",
+        "values": {
+          "email": "email",
+          "password": "password"
+        }
+      }
+    }
+  },
+  {
+    "command": "set variable",
+    "args": {
+      "name": "email",
+      "value": "example@test.com"
+    }
+  },
+  {
+    "command": "compare values",
+    "args": {
+      "name": "email",
+      "comp_operator": "==",
+      "value": "example@test.com",
+      "type": "if_start",
+      "commands": [
+        {
+          "command": "create variable",
+          "args": {
+            "name": "email",
+            "type": "string",
+            "value": "test@example.com"
+          }
+        },
+        {
+          "command": "set variable",
+          "args": {
+            "name": "email",
+            "value": "example@test.com"
+          }
+        },
+        {
+          "command": "set variable",
+          "args": {
+            "name": "name",
+            "value": "futa matsuo"
+          }
+        }
+      ]
+    }
+  }
 ]
