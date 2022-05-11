@@ -24,10 +24,19 @@ const (
 	CompareValues   = CommandName("compare values")
 )
 
+type CommandType string
+
+const (
+	If    = CommandType("if")
+	Else  = CommandType("else")
+	Endif = CommandType("end")
+)
+
 // command is the struct of input command.
 type Command struct {
 	Name CommandName `json:"command"`
 	Args `json:"args"`
+	Type CommandType `json:"type"`
 }
 
 // QueryType is the type of SQL Query CRUD.
@@ -61,6 +70,7 @@ type Args struct {
 	Query        Query        `json:"sql"`
 	Target       string       `json:"target"`
 	CompOperator string       `json:"comp_operator"`
+	Commands     []Command    `json:"commands"`
 }
 
 // Commands is the interface of input commands.
@@ -96,27 +106,39 @@ func (gc *generateCode) createVariable(ctx context.Context, args Args) (err erro
 }
 
 func (gc *generateCode) hashPassword(ctx context.Context, args Args) (err error) {
-	gc.CommandLines = append(gc.CommandLines, jen.Id(args.Name).Op(":=").Lit(args.Value))
 	return
 }
 
 func (gc *generateCode) databaseConnect(ctx context.Context, args Args) (err error) {
-	gc.CommandLines = append(gc.CommandLines, jen.Id(args.Name).Op(":=").Lit(args.Value))
 	return
 }
 
 func (gc *generateCode) databaseQuery(ctx context.Context, args Args) (err error) {
-	gc.CommandLines = append(gc.CommandLines, jen.Id(args.Name).Op(":=").Lit(args.Value))
+
 	return
 }
 
 func (gc *generateCode) SetVariable(ctx context.Context, args Args) (err error) {
-	gc.CommandLines = append(gc.CommandLines, jen.Id(args.Name).Op(":=").Lit(args.Value))
+	gc.CommandLines = append(gc.CommandLines, jen.Id(args.Name).Op("=").Lit(args.Value))
 	return
 }
 
+// func (gc *generateCode) CommandDivide(comname string) (err error) {
+
+// }
+
 func (gc *generateCode) CompareValues(ctx context.Context, args Args) (err error) {
-	gc.CommandLines = append(gc.CommandLines, jen.Id(args.Name).Op(":=").Lit(args.Value))
+	gc.CommandLines = append(gc.CommandLines, jen.If(jen.Parens(jen.Id(args.Name).Op("==").Lit(args.Value))).BlockFunc(func(g *jen.Group) {
+		for _, com := range args.Commands {
+			switch com.Name {
+			case "create variable":
+				g.Add(jen.Id(com.Args.Name).Op(":=").Lit(com.Args.Value))
+			case "set variable":
+				g.Add(jen.Id(com.Args.Name).Op("=").Lit(com.Args.Value))
+			case "compare values":
+			}
+		}
+	}))
 	return
 }
 
@@ -176,5 +198,4 @@ func main() {
 	}
 
 	gc.Generate(ctx)
-
 }
